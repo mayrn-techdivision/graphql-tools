@@ -114,8 +114,10 @@ async function executeDelegationStage(
         const objectSubschema = source[OBJECT_SUBSCHEMA_SYMBOL];
         const fieldSubschemaMap = source[FIELD_SUBSCHEMA_MAP_SYMBOL];
         for (const responseKey in source) {
-          object[responseKey] = source[responseKey];
-          combinedFieldSubschemaMap[responseKey] = fieldSubschemaMap?.[responseKey] ?? objectSubschema;
+          if (source[responseKey] != null) {
+            object[responseKey] = source[responseKey];
+            combinedFieldSubschemaMap[responseKey] = fieldSubschemaMap?.[responseKey] ?? objectSubschema;
+          }
         }
       }
     })
