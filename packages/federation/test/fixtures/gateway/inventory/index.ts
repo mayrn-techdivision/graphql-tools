@@ -1,6 +1,7 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { buildSubgraphSchema } from '@apollo/subgraph';
 import { parse } from 'graphql';
+import { inspect } from 'util';
 
 export const typeDefs = /* GraphQL */ `
   extend type Product @key(fields: "upc") {
@@ -21,6 +22,9 @@ const resolvers: IResolvers = {
       };
     },
     shippingEstimate(object) {
+      if (object.price == null || object.weight == null) {
+        throw new Error(`${inspect(object)} doesn't have required fields; "price" and "weight".`);
+      }
       // free for expensive items
       if (object.price > 1000) return 0;
       // estimate is based on weight

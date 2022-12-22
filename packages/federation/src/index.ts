@@ -4,13 +4,13 @@ import {
   ASTVisitFn,
   buildASTSchema,
   concatAST,
+  DocumentNode,
   FieldDefinitionNode,
   GraphQLSchema,
   Kind,
   ObjectTypeDefinitionNode,
   ObjectTypeExtensionNode,
   parse,
-  print,
   visit,
 } from 'graphql';
 
@@ -55,7 +55,7 @@ export type FederationConfig =
   | FederationConfigWithSDLAndExecutor;
 
 export type FederationConfigWithSDLAndExecutor = {
-  sdl: string;
+  typeDefs: DocumentNode | string;
   executor: Executor;
 };
 export type FederationConfigWithExecutor = {
@@ -63,6 +63,7 @@ export type FederationConfigWithExecutor = {
 };
 export type FederationConfigWithSchema = {
   schema: GraphQLSchema;
+  typeDefs?: DocumentNode | string;
 };
 
 const SDLQuery = /* GraphQL */ `
@@ -73,28 +74,36 @@ const SDLQuery = /* GraphQL */ `
   }
 `;
 
-const FederationArgsFromKeys = (representations: readonly any[]) => ({ representations });
-const FederationKeyFactory = (root: any) =>
-  Object.fromEntries(Object.entries(root).filter(([_, value]) => value != null));
+function getArgsFromKeysForFederation(representations: readonly any[]) {
+  return { representations };
+}
+
+function getKeyForFederation(root: any) {
+  return root;
+}
 
 export async function useFederation(config: FederationConfig): Promise<SubschemaConfig> {
-  let sdl: string;
+  let typeDefs: DocumentNode;
   let executor: Executor;
-  if ('sdl' in config) {
-    sdl = config.sdl;
-    executor = config.executor;
-  } else if ('schema' in config) {
+  if ('schema' in config) {
     executor = createDefaultExecutor(config.schema);
-    const sdlQueryResult = (await executor({
-      document: parse(SDLQuery),
-    })) as ExecutionResult<any>;
-    sdl = sdlQueryResult.data._service.sdl;
+    if (config.typeDefs) {
+      typeDefs = typeof config.typeDefs === 'string' ? parse(config.typeDefs) : config.typeDefs;
+    } else {
+      const sdlQueryResult = (await executor({
+        document: parse(SDLQuery),
+      })) as ExecutionResult<any>;
+      typeDefs = parse(sdlQueryResult.data._service.sdl);
+    }
+  } else if ('typeDefs' in config) {
+    typeDefs = typeof config.typeDefs === 'string' ? parse(config.typeDefs) : config.typeDefs;
+    executor = config.executor;
   } else {
     executor = config.executor;
     const sdlQueryResult = (await executor({
       document: parse(SDLQuery),
     })) as ExecutionResult<any>;
-    sdl = sdlQueryResult.data._service.sdl;
+    typeDefs = parse(sdlQueryResult.data._service.sdl);
   }
   const subschemaConfig = {} as SubschemaConfig;
   const typeMergingConfig = (subschemaConfig.merge = subschemaConfig.merge || {});
@@ -124,17 +133,19 @@ export async function useFederation(config: FederationConfig): Promise<Subschema
             return null;
         }
       }
+      // If it is not an entity, continue
+      if (selections.length === 0) {
+        return node;
+      }
       const typeMergingTypeConfig = (typeMergingConfig[typeName] = typeMergingConfig[typeName] || {});
       if (node.kind === Kind.OBJECT_TYPE_DEFINITION) {
         typeMergingTypeConfig.canonical = true;
       }
-      if (selections.length > 0) {
-        entityTypes.push(typeName);
-        typeMergingTypeConfig.selectionSet = `{ ${selections.join(' ')} }`;
-        typeMergingTypeConfig.key = FederationKeyFactory;
-        typeMergingTypeConfig.argsFromKeys = FederationArgsFromKeys;
-        typeMergingTypeConfig.fieldName = `_entities`;
-      }
+      entityTypes.push(typeName);
+      typeMergingTypeConfig.selectionSet = `{ ${selections.join(' ')} }`;
+      typeMergingTypeConfig.key = getKeyForFederation;
+      typeMergingTypeConfig.argsFromKeys = getArgsFromKeysForFederation;
+      typeMergingTypeConfig.fieldName = `_entities`;
       const fields = [];
       if (node.fields) {
         for (const fieldNode of node.fields) {
@@ -188,7 +199,7 @@ export async function useFederation(config: FederationConfig): Promise<Subschema
       kind: Kind.OBJECT_TYPE_DEFINITION,
     };
   };
-  const parsedSDL = visit(parse(sdl), {
+  const parsedSDL = visit(typeDefs, {
     ObjectTypeExtension: visitor,
     ObjectTypeDefinition: visitor,
   });

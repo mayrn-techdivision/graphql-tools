@@ -75,8 +75,8 @@ describe('Gateway', () => {
                 {
                   "author": {
                     "id": "1",
-                    "name": null,
-                    "username": null,
+                    "name": "Ada Lovelace",
+                    "username": "@ada",
                   },
                   "body": "Love it!",
                   "id": "1",
@@ -84,8 +84,8 @@ describe('Gateway', () => {
                 {
                   "author": {
                     "id": "2",
-                    "name": null,
-                    "username": null,
+                    "name": "Alan Turing",
+                    "username": "@complete",
                   },
                   "body": "Prefer something else.",
                   "id": "4",
@@ -103,8 +103,8 @@ describe('Gateway', () => {
                 {
                   "author": {
                     "id": "1",
-                    "name": null,
-                    "username": null,
+                    "name": "Ada Lovelace",
+                    "username": "@ada",
                   },
                   "body": "Too expensive.",
                   "id": "2",
@@ -122,8 +122,8 @@ describe('Gateway', () => {
                 {
                   "author": {
                     "id": "2",
-                    "name": null,
-                    "username": null,
+                    "name": "Alan Turing",
+                    "username": "@complete",
                   },
                   "body": "Could be better.",
                   "id": "3",
@@ -144,11 +144,11 @@ describe('Gateway', () => {
                   "id": "1",
                   "product": {
                     "inStock": true,
-                    "name": null,
-                    "price": null,
-                    "shippingEstimate": null,
+                    "name": "Table",
+                    "price": 899,
+                    "shippingEstimate": 50,
                     "upc": "1",
-                    "weight": null,
+                    "weight": 100,
                   },
                 },
                 {
@@ -156,11 +156,11 @@ describe('Gateway', () => {
                   "id": "2",
                   "product": {
                     "inStock": false,
-                    "name": null,
-                    "price": null,
-                    "shippingEstimate": null,
+                    "name": "Couch",
+                    "price": 1299,
+                    "shippingEstimate": 0,
                     "upc": "2",
-                    "weight": null,
+                    "weight": 1000,
                   },
                 },
               ],
@@ -175,11 +175,11 @@ describe('Gateway', () => {
                   "id": "3",
                   "product": {
                     "inStock": true,
-                    "name": null,
-                    "price": null,
-                    "shippingEstimate": null,
+                    "name": "Chair",
+                    "price": 54,
+                    "shippingEstimate": 25,
                     "upc": "3",
-                    "weight": null,
+                    "weight": 50,
                   },
                 },
                 {
@@ -187,11 +187,11 @@ describe('Gateway', () => {
                   "id": "4",
                   "product": {
                     "inStock": true,
-                    "name": null,
-                    "price": null,
-                    "shippingEstimate": null,
+                    "name": "Table",
+                    "price": 899,
+                    "shippingEstimate": 50,
                     "upc": "1",
-                    "weight": null,
+                    "weight": 100,
                   },
                 },
               ],
@@ -199,12 +199,6 @@ describe('Gateway', () => {
             },
           ],
         },
-        "errors": [
-          [GraphQLError: Int cannot represent non-integer value: NaN],
-          [GraphQLError: Int cannot represent non-integer value: NaN],
-          [GraphQLError: Int cannot represent non-integer value: NaN],
-          [GraphQLError: Int cannot represent non-integer value: NaN],
-        ],
       }
     `);
   });
