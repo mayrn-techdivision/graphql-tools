@@ -6,12 +6,14 @@ import { SubschemaConfig } from '@graphql-tools/delegate';
 import { parse } from 'graphql';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { normalizedExecutor } from '@graphql-tools/executor';
-import { useFederation } from '@graphql-tools/federation';
+import { getSubschemaForFederationWithSchema } from '@graphql-tools/federation';
 
 describe('Gateway', () => {
   it('should give the correct result', async () => {
     const services = [Accounts, Products, Reviews, Inventory];
-    const subschemas: SubschemaConfig[] = await Promise.all(services.map(service => useFederation(service)));
+    const subschemas: SubschemaConfig[] = await Promise.all(
+      services.map(({ schema }) => getSubschemaForFederationWithSchema(schema))
+    );
 
     const gatewaySchema = stitchSchemas({
       subschemas,

@@ -1,5 +1,7 @@
 import { createDefaultExecutor, SubschemaConfig } from '@graphql-tools/delegate';
-import { ExecutionResult, Executor } from '@graphql-tools/utils';
+import { buildHTTPExecutor, HTTPExecutorOptions } from '@graphql-tools/executor-http';
+import { stitchSchemas } from '@graphql-tools/stitch';
+import { AsyncExecutor, ExecutionResult, Executor, getDocumentNodeFromSchema } from '@graphql-tools/utils';
 import {
   ASTVisitFn,
   buildASTSchema,
@@ -14,7 +16,7 @@ import {
   visit,
 } from 'graphql';
 
-export const baseSDL = /* GraphQL */ `
+export const SubgraphBaseSDL = /* GraphQL */ `
   scalar _Any
   scalar FieldSet
   scalar link__Import
@@ -49,25 +51,8 @@ export const baseSDL = /* GraphQL */ `
   directive @extends on OBJECT | INTERFACE
 `;
 
-export type FederationConfig =
-  | FederationConfigWithExecutor
-  | FederationConfigWithSchema
-  | FederationConfigWithSDLAndExecutor;
-
-export type FederationConfigWithSDLAndExecutor = {
-  typeDefs: DocumentNode | string;
-  executor: Executor;
-};
-export type FederationConfigWithExecutor = {
-  executor: Executor;
-};
-export type FederationConfigWithSchema = {
-  schema: GraphQLSchema;
-  typeDefs?: DocumentNode | string;
-};
-
-const SDLQuery = /* GraphQL */ `
-  query SDLQuery {
+export const SubgraphSDLQuery = /* GraphQL */ `
+  query SubgraphSDL {
     _service {
       sdl
     }
@@ -82,29 +67,12 @@ function getKeyForFederation(root: any) {
   return root;
 }
 
-export async function useFederation(config: FederationConfig): Promise<SubschemaConfig> {
-  let typeDefs: DocumentNode;
-  let executor: Executor;
-  if ('schema' in config) {
-    executor = createDefaultExecutor(config.schema);
-    if (config.typeDefs) {
-      typeDefs = typeof config.typeDefs === 'string' ? parse(config.typeDefs) : config.typeDefs;
-    } else {
-      const sdlQueryResult = (await executor({
-        document: parse(SDLQuery),
-      })) as ExecutionResult<any>;
-      typeDefs = parse(sdlQueryResult.data._service.sdl);
-    }
-  } else if ('typeDefs' in config) {
-    typeDefs = typeof config.typeDefs === 'string' ? parse(config.typeDefs) : config.typeDefs;
-    executor = config.executor;
-  } else {
-    executor = config.executor;
-    const sdlQueryResult = (await executor({
-      document: parse(SDLQuery),
-    })) as ExecutionResult<any>;
-    typeDefs = parse(sdlQueryResult.data._service.sdl);
-  }
+export function getSubschemaForFederationWithURL(config: HTTPExecutorOptions): Promise<SubschemaConfig> {
+  const executor = buildHTTPExecutor(config as any) as AsyncExecutor;
+  return getSubschemaForFederationWithExecutor(executor);
+}
+
+export function getSubschemaForFederationWithTypeDefs(typeDefs: DocumentNode): SubschemaConfig {
   const subschemaConfig = {} as SubschemaConfig;
   const typeMergingConfig = (subschemaConfig.merge = subschemaConfig.merge || {});
   const entityTypes: string[] = [];
@@ -204,13 +172,50 @@ export async function useFederation(config: FederationConfig): Promise<Subschema
     ObjectTypeDefinition: visitor,
   });
   subschemaConfig.schema = buildASTSchema(
-    concatAST([parse(`union _Entity = ${entityTypes.join(' | ')}` + baseSDL), parsedSDL]),
+    concatAST([parse(`union _Entity = ${entityTypes.join(' | ')}` + SubgraphBaseSDL), parsedSDL]),
     {
       assumeValidSDL: true,
       assumeValid: true,
     }
   );
-  subschemaConfig.executor = executor;
   subschemaConfig.batch = true;
   return subschemaConfig;
+}
+
+export async function getSubschemaForFederationWithExecutor(executor: Executor) {
+  const sdlQueryResult = (await executor({
+    document: parse(SubgraphSDLQuery),
+  })) as ExecutionResult;
+  const typeDefs = parse(sdlQueryResult.data._service.sdl);
+
+  const subschemaConfig = getSubschemaForFederationWithTypeDefs(typeDefs);
+  return {
+    ...subschemaConfig,
+    executor,
+  };
+}
+
+export async function getSubschemaForFederationWithSchema(schema: GraphQLSchema) {
+  const executor = createDefaultExecutor(schema);
+  return getSubschemaForFederationWithExecutor(executor);
+}
+
+export async function getStitchedSchemaWithUrls(configs: HTTPExecutorOptions[]) {
+  const subschemas = await Promise.all(configs.map(config => getSubschemaForFederationWithURL(config)));
+  return stitchSchemas({
+    subschemas,
+  });
+}
+
+export function federationSubschemaTransformer(subschemaConfig: SubschemaConfig): SubschemaConfig {
+  const typeDefs = getDocumentNodeFromSchema(subschemaConfig.schema);
+  const newSubschema = getSubschemaForFederationWithTypeDefs(typeDefs);
+  return {
+    ...subschemaConfig,
+    ...newSubschema,
+    merge: {
+      ...newSubschema.merge,
+      ...subschemaConfig.merge,
+    },
+  };
 }
