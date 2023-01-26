@@ -1,6 +1,5 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { buildSubgraphSchema } from '../../../../src';
-import { parse } from 'graphql';
 
 export const typeDefs = /* GraphQL */ `
   extend type Query {
