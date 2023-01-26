@@ -1,13 +1,22 @@
 import { createDefaultExecutor, SubschemaConfig } from '@graphql-tools/delegate';
 import { buildHTTPExecutor, HTTPExecutorOptions } from '@graphql-tools/executor-http';
+import { mergeResolvers, mergeTypeDefs } from '@graphql-tools/merge';
+import { IExecutableSchemaDefinition, makeExecutableSchema } from '@graphql-tools/schema';
 import { stitchSchemas } from '@graphql-tools/stitch';
-import { AsyncExecutor, ExecutionResult, Executor, getDocumentNodeFromSchema } from '@graphql-tools/utils';
+import {
+  AsyncExecutor,
+  ExecutionResult,
+  Executor,
+  getDocumentNodeFromSchema,
+  printSchemaWithDirectives,
+} from '@graphql-tools/utils';
 import {
   ASTVisitFn,
   buildASTSchema,
   concatAST,
   DocumentNode,
   FieldDefinitionNode,
+  GraphQLResolveInfo,
   GraphQLSchema,
   Kind,
   ObjectTypeDefinitionNode,
@@ -218,4 +227,47 @@ export function federationSubschemaTransformer(subschemaConfig: SubschemaConfig)
       ...subschemaConfig.merge,
     },
   };
+}
+
+export function buildSubgraphSchema<TContext = any>(opts: IExecutableSchemaDefinition<TContext>) {
+  const typeDefs = mergeTypeDefs([SubgraphBaseSDL, opts.typeDefs]);
+  const entityTypeNames: string[] = [];
+  visit(typeDefs, {
+    ObjectTypeDefinition: node => {
+      if (node.directives?.some(directive => directive.name.value === 'key')) {
+        entityTypeNames.push(node.name.value);
+      }
+    },
+  });
+  const entityTypeDefinition = `union _Entity = ${entityTypeNames.join(' | ')}`;
+  const givenResolvers: any = mergeResolvers(opts.resolvers);
+  const subgraphResolvers = {
+    _Entity: {
+      __resolveType: (obj: { __typename: string }) => obj.__typename,
+    },
+    Query: {
+      _entities: async (_root: never, args: { representations: any[] }, context: TContext, info: GraphQLResolveInfo) =>
+        args.representations.map(async representation => {
+          const resolvedEntity = await givenResolvers[representation.__typename]?.__resolveReference?.(
+            representation,
+            context,
+            info
+          );
+          return {
+            ...representation,
+            ...resolvedEntity,
+          };
+        }),
+      _service: () => ({}),
+    },
+    _Service: {
+      sdl: (_root: never, _args: never, _context: TContext, info: GraphQLResolveInfo) =>
+        printSchemaWithDirectives(info.schema),
+    },
+  };
+  return makeExecutableSchema({
+    ...opts,
+    typeDefs: [entityTypeDefinition, typeDefs],
+    resolvers: [subgraphResolvers, givenResolvers],
+  });
 }

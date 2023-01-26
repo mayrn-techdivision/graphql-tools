@@ -1,5 +1,5 @@
 import { IResolvers } from '@graphql-tools/utils';
-import { buildSubgraphSchema } from '@apollo/subgraph';
+import { buildSubgraphSchema } from '../../../../src';
 import { parse } from 'graphql';
 
 export const typeDefs = /* GraphQL */ `
@@ -32,12 +32,10 @@ const resolvers: IResolvers = {
   },
 };
 
-export const schema = buildSubgraphSchema([
-  {
-    typeDefs: parse(typeDefs),
-    resolvers: resolvers as any,
-  },
-]);
+export const schema = buildSubgraphSchema({
+  typeDefs,
+  resolvers: resolvers as any,
+});
 
 const users = [
   {

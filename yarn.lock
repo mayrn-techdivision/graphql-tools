@@ -211,15 +211,6 @@
     chalk "^4.1.0"
     js-levenshtein "^1.1.6"
 
-"@apollo/federation@0.38.1":
-  version "0.38.1"
-  resolved "https://registry.yarnpkg.com/@apollo/federation/-/federation-0.38.1.tgz#0b8a9b4cbf5ebfa3106c20c47ec1f33cf92102a0"
-  integrity sha512-miifyAEsFgiYKeM3lUHFH6+vKa2vm9dXKSyWVpX6oeJiPblFLe2/iByN3psZQO2sRdVqO1OKYrGXdgKc74XDKw==
-  dependencies:
-    "@apollo/subgraph" "^0.6.1"
-    apollo-server-types "^3.0.2"
-    lodash.xorby "^4.7.0"
-
 "@apollo/gateway@2.2.2":
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/@apollo/gateway/-/gateway-2.2.2.tgz#8add24f0287838c0d6992e002da02b36218cc622"
@@ -243,25 +234,6 @@
     make-fetch-happen "^11.0.0"
     node-abort-controller "^3.0.1"
     node-fetch "^2.6.7"
-
-"@apollo/protobufjs@1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@apollo/protobufjs/-/protobufjs-1.2.2.tgz#4bd92cd7701ccaef6d517cdb75af2755f049f87c"
-  integrity sha512-vF+zxhPiLtkwxONs6YanSt1EpwpGilThpneExUN5K3tCymuxNnVq2yojTvnpRjv2QfsEIt/n7ozPIIzBLwGIDQ==
-  dependencies:
-    "@protobufjs/aspromise" "^1.1.2"
-    "@protobufjs/base64" "^1.1.2"
-    "@protobufjs/codegen" "^2.0.4"
-    "@protobufjs/eventemitter" "^1.1.0"
-    "@protobufjs/fetch" "^1.1.0"
-    "@protobufjs/float" "^1.0.2"
-    "@protobufjs/inquire" "^1.1.0"
-    "@protobufjs/path" "^1.1.2"
-    "@protobufjs/pool" "^1.1.0"
-    "@protobufjs/utf8" "^1.1.0"
-    "@types/long" "^4.0.0"
-    "@types/node" "^10.1.0"
-    long "^4.0.0"
 
 "@apollo/protobufjs@1.2.6":
   version "1.2.6"
@@ -314,12 +286,13 @@
     "@apollo/utils.keyvaluecache" "^1.0.1"
     "@apollo/utils.logger" "^1.0.0"
 
-"@apollo/subgraph@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@apollo/subgraph/-/subgraph-0.6.1.tgz#18f496f496ecf42d0eb372ab1d2d457d30e5a76e"
-  integrity sha512-w/6FoubSxuzXSx8uvLE1wEuHZVHRXFyfHPKdM76wX5U/xw82zlUKseVO7wTuVODTcnUzEA30udYeCApUoC3/Xw==
+"@apollo/subgraph@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@apollo/subgraph/-/subgraph-2.2.2.tgz#5cfb9d580cc1f84b46c4ee29238d1d16bdb1507a"
+  integrity sha512-CUJPN1v9JZgkMBWkmufJMGduUwTD4fFyjOk2oLRWUDB41r9+eeyI3/CvuuGaZH+xMxMOSf5HN9tbbAO/sPnuTQ==
   dependencies:
     "@apollo/cache-control-types" "^1.0.2"
+    "@apollo/federation-internals" "^2.2.2"
 
 "@apollo/usage-reporting-protobuf@^4.0.0", "@apollo/usage-reporting-protobuf@^4.0.0-alpha.1":
   version "4.0.0"
@@ -1795,10 +1768,35 @@
     tslib "^2.4.0"
     value-or-promise "1.0.11"
 
+"@graphql-tools/merge@8.3.16":
+  version "8.3.16"
+  resolved "https://registry.yarnpkg.com/@graphql-tools/merge/-/merge-8.3.16.tgz#fede610687b148e34ff861e8b038dcd71e20039b"
+  integrity sha512-In0kcOZcPIpYOKaqdrJ3thdLPE7TutFnL9tbrHUy2zCinR2O/blpRC48jPckcs0HHrUQ0pGT4HqvzMkZUeEBAw==
+  dependencies:
+    "@graphql-tools/utils" "9.1.4"
+    tslib "^2.4.0"
+
+"@graphql-tools/schema@9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@graphql-tools/schema/-/schema-9.0.14.tgz#9a658ab82d5a7d4db73f68a44900d4c88a98f0bc"
+  integrity sha512-U6k+HY3Git+dsOEhq+dtWQwYg2CAgue8qBvnBXoKu5eEeH284wymMUoNm0e4IycOgMCJANVhClGEBIkLRu3FQQ==
+  dependencies:
+    "@graphql-tools/merge" "8.3.16"
+    "@graphql-tools/utils" "9.1.4"
+    tslib "^2.4.0"
+    value-or-promise "1.0.12"
+
 "@graphql-tools/utils@9.1.1":
   version "9.1.1"
   resolved "https://registry.yarnpkg.com/@graphql-tools/utils/-/utils-9.1.1.tgz#b47ea8f0d18c038c5c1c429e72caa5c25039fbab"
   integrity sha512-DXKLIEDbihK24fktR2hwp/BNIVwULIHaSTNTNhXS+19vgT50eX9wndx1bPxGwHnVBOONcwjXy0roQac49vdt/w==
+  dependencies:
+    tslib "^2.4.0"
+
+"@graphql-tools/utils@9.1.4":
+  version "9.1.4"
+  resolved "https://registry.yarnpkg.com/@graphql-tools/utils/-/utils-9.1.4.tgz#2c9e0aefc9655dd73247667befe3c850ec014f3f"
+  integrity sha512-hgIeLt95h9nQgQuzbbdhuZmh+8WV7RZ/6GbTj6t3IU4Zd2zs9yYJ2jgW/krO587GMOY8zCwrjNOMzD40u3l7Vg==
   dependencies:
     tslib "^2.4.0"
 
@@ -3836,36 +3834,6 @@ anymatch@^3.0.3, anymatch@~3.1.2:
   dependencies:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
-
-apollo-reporting-protobuf@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/apollo-reporting-protobuf/-/apollo-reporting-protobuf-3.3.0.tgz#2fc0f7508e488851eda8a6e7c8cc3b5a156ab44b"
-  integrity sha512-51Jwrg0NvHJfKz7TIGU8+Os3rUAqWtXeKRsRtKYtTeMSBPNhzz8UoGjAB3XyVmUXRE3IRmLtDPDRFL7qbxMI/w==
-  dependencies:
-    "@apollo/protobufjs" "1.2.2"
-
-apollo-server-caching@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/apollo-server-caching/-/apollo-server-caching-3.3.0.tgz#f501cbeb820a4201d98c2b768c085f22848d9dc5"
-  integrity sha512-Wgcb0ArjZ5DjQ7ID+tvxUcZ7Yxdbk5l1MxZL8D8gkyjooOkhPNzjRVQ7ubPoXqO54PrOMOTm1ejVhsF+AfIirQ==
-  dependencies:
-    lru-cache "^6.0.0"
-
-apollo-server-env@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/apollo-server-env/-/apollo-server-env-4.2.0.tgz#d7cb08a81cee3025cd47b08be80b359d61d85913"
-  integrity sha512-4xJ+PCoWsFLj4rU6iXrIhqD7nI42goi4Iqrhsof9680ljSzkzd+PCwZsja3mHOFXKUQQUvJ7StVSgwaiRu45+A==
-  dependencies:
-    node-fetch "^2.6.1"
-
-apollo-server-types@^3.0.2:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/apollo-server-types/-/apollo-server-types-3.5.0.tgz#82f912d7765152fe1fde86cea8a076e9a0831a9d"
-  integrity sha512-4JaZNu1kjrzIbppgc78hhIe2DFe+XONf8grprcjTOe0v8dIsuV0tFUnl+awTvTpHU1sdjRCKwnj382BebiL+qw==
-  dependencies:
-    apollo-reporting-protobuf "^3.3.0"
-    apollo-server-caching "^3.3.0"
-    apollo-server-env "^4.2.0"
 
 apollo-upload-client@17.0.0:
   version "17.0.0"
@@ -8342,11 +8310,6 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==
 
-lodash.xorby@^4.7.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/lodash.xorby/-/lodash.xorby-4.7.0.tgz#9c19a6f9f063a6eb53dd03c1b6871799801463d7"
-  integrity sha1-nBmm+fBjputT3QPBtocXmYAUY9c=
-
 lodash@4.17.21, lodash@^4.17.15, lodash@^4.17.20, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
@@ -12201,6 +12164,11 @@ value-or-promise@1.0.11, value-or-promise@^1.0.11:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/value-or-promise/-/value-or-promise-1.0.11.tgz#3e90299af31dd014fe843fe309cefa7c1d94b140"
   integrity sha512-41BrgH+dIbCFXClcSapVs5M6GkENd3gQOJpEfPDNa71LsUGMXDL0jMWpI/Rh7WhX+Aalfz2TTS3Zt5pUsbnhLg==
+
+value-or-promise@1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/value-or-promise/-/value-or-promise-1.0.12.tgz#0e5abfeec70148c78460a849f6b003ea7986f15c"
+  integrity sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==
 
 vary@~1.1.2:
   version "1.1.2"
